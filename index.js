@@ -9,13 +9,14 @@ const dirSave = `${config.dirSave}`;
 const urlFacebook = 'https://www.facebook.com/login.php'
 const urlDownload = `${config.uriDownload}`;
 
-
+// create folder result
 function createResultFolder() {
     if(fs.existsSync(dirSave) == false) {
         fs.mkdirSync(dirSave);
     }
 }
 
+// sleep in ms =  second * 1000
 function sleep(ms) {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
@@ -41,10 +42,10 @@ async function main () {
     }
     else {
         await loginFB.goto(urlFacebook, {waitUntil:'networkidle0'})
-        await loginFB.type('#email',config.username, {delay:'10'})
-        await loginFB.type('#pass',config.password, {delay:'10'})
+        await loginFB.type('#email',config.username, {delay:'10'}) // enter username
+        await loginFB.type('#pass',config.password, {delay:'10'}) // enter password
 
-        await loginFB.click("#loginbutton");
+        await loginFB.click("#loginbutton"); // press button login
         await loginFB.waitForNavigation({waitUntil: 'networkidle0'})
     }
 
@@ -72,7 +73,7 @@ async function main () {
     }
 
     createResultFolder();
-    // get images 
+    // get url images with JS in inspect
     const imageSrcSets= await page.evaluate(() =>{
         const imgs = Array.from(document.querySelectorAll('article img'));
         const srcSetAttribute = imgs.map(i => i.getAttribute('srcset'));
@@ -84,6 +85,7 @@ async function main () {
 
     let counterImageDownloads = 0;
     for(let i = 0; i< imageSrcSets.length; i++){
+        // get images lagest in srcset
         const sr = imageSrcSets[i];
         const s = sr.split(',');
         const rs = s[s.length - 1].split(' ')[0];
@@ -91,14 +93,14 @@ async function main () {
             url: rs,
             dest: dirSave
           }
-        // console.log(rs);
+        // download images
         downloader.image(options).
         then(({ filename }) => {
             counterImageDownloads += 1
-            console.log(`Saved to ${filename}  ---  ${counterImageDownloads}`)  // saved to /path/to/dest/photo
+            console.log(`Saved to ${filename}  ---  ${counterImageDownloads}`)  // saved to /path/to/dest/photo --- number downloader
         }).catch((err) => console.error(err))
     }
-    // console.log(`${counterImageDownloads} PHOTOS HAVE BEEN DOWNLOADED`)
+    
 }
 
 
